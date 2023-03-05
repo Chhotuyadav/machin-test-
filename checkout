@@ -1,0 +1,43 @@
+public function CheckOutPage($id){
+        $id = base64_decode($id);
+
+        $ip_add = get_client_ip();
+
+        $response = json_decode(file_get_contents('http://ip-api.com/json/'.$ip_add),true);
+        // _dx($response);
+        $res['flag_ind']  =  false;
+
+        if($response['country'] == 'India'){
+            $res['flag_ind']  =  true;
+            $code = "INR";
+        }else{
+            $code = "USD";
+        }
+
+
+        $res['course']  =  $this->common->getSelectedOneDataWithCondition('course',['*'],['id'=>$id]);
+        // _dx($res['course']);
+        if (empty($this->session->userdata('user'))) {
+            $res['user_id'] = '';
+        }else{
+            $res['user_id'] = $this->session->userdata('user')['id'];
+        }
+        
+        if ($res['user_id']) {
+            $IsCheck  =  $this->common->getSelectedOneDataWithCondition('sell_order',['*'],['course_id'=>$id,'user_id'=>$res['user_id'],'payment_status'=>'captured']);
+            if(!empty($IsCheck)){
+                redirect(base_url('course-details/'.base64_encode($id).'/'.str_replace(' ', '-', $res['course']['title'])));
+                die();
+            }
+        }
+
+
+        $res['title']              = 'Checkout payment | Infovistar';  
+        $res['callback_url']       = base_url().'razorpay/callback';
+        $res['surl']               = base_url().'razorpay/success';;
+        $res['furl']               = base_url().'razorpay/failed';;
+        $res['currency_code']      = $code;
+
+        // _dx($res);
+        $this->load->view('checkout',$res);
+    }
