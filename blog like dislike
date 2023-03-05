@@ -1,0 +1,87 @@
+/////////////////// bloglike ///////////////////
+	public function bloglike($blog_id,$user_id){
+		$res = $this->common->isExist('blog_like',['blog_id'=>$blog_id,'user_id'=>$user_id]);
+		
+		
+		if ($res['status']) {
+			$dataToReturn['status'] = false;
+			$dataToReturn['msg'] = 'You Already Liked';
+			echo json_encode($dataToReturn);
+			die();
+		}
+		else{
+			$res = $this->common->isExist('blog_dislike',['blog_id'=>$blog_id,'user_id'=>$user_id]);
+			if ($res['status']) {
+				$this->common->delete('blog_dislike',['blog_id'=>$blog_id,'user_id'=>$user_id]);
+			}
+			$data = array(
+				'blog_id' => $blog_id,
+				'user_id' => $user_id,
+			);
+			$result = $this->common->insertData('blog_like',$data);
+			if ($result) {
+				$totalLike = GetCount('blog_like','blog_id',$blog_id)->count;
+				$totalDisLike = GetCount('blog_dislike','blog_id',$blog_id)->count;
+				$array = array(
+					'like'=>$totalLike,
+					'dislike'=>$totalDisLike
+				);
+				$this->common->update('blog',$array,['id'=>$blog_id]);
+
+
+				$dataToReturn['status'] = true;
+				$dataToReturn['msg'] = 'liked';
+				$dataToReturn['like'] = $totalLike;
+				$dataToReturn['dislike'] = $totalDisLike;
+			}else{
+				$dataToReturn['status'] = false;
+				$dataToReturn['msg'] = 'No updation';
+			}
+
+			echo json_encode($dataToReturn);
+			die();
+		}
+	}
+/////////////////// bloglike ///////////////////
+
+/////////////////// blogdislike ///////////////////
+	public function blogdislike($blog_id,$user_id){
+		$res = $this->common->isExist('blog_dislike',['blog_id'=>$blog_id,'user_id'=>$user_id]);
+
+		if ($res['status']) {
+			$dataToReturn['status'] = false;
+			$dataToReturn['msg'] = 'You Already Disliked';
+			echo json_encode($dataToReturn);
+			die();
+		}
+		else{
+			$res = $this->common->isExist('blog_like',['blog_id'=>$blog_id,'user_id'=>$user_id]);
+			if ($res['status']) {
+				$this->common->delete('blog_like',['blog_id'=>$blog_id,'user_id'=>$user_id]);
+			}
+			$data = array(
+				'blog_id' => $blog_id,
+				'user_id' => $user_id,
+			);
+			$result = $this->common->insertData('blog_dislike',$data);
+			if ($result) {
+				$totalLike = GetCount('blog_like','blog_id',$blog_id)->count;
+				$totalDisLike = GetCount('blog_dislike','blog_id',$blog_id)->count;
+				$array = array(
+					'like'=>$totalLike,
+					'dislike'=>$totalDisLike
+				);
+				$this->common->update('blog',$array,['id'=>$blog_id]);
+				$dataToReturn['like'] = $totalLike;
+				$dataToReturn['dislike'] = $totalDisLike;
+				$dataToReturn['status'] = true;
+				$dataToReturn['msg'] = 'disliked';
+			}else{
+				$dataToReturn['status'] = false;
+				$dataToReturn['msg'] = 'No updation';
+			}
+			echo json_encode($dataToReturn);
+			die();
+		}
+	}
+/////////////////// bloglike ///////////////////
