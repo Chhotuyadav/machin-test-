@@ -1,0 +1,29 @@
+public function blog_details($title,$id){
+    	$id = base64_decode($id);
+    	$res['data'] = $this->common->getSelectedOneDataWithCondition('blog',['*'],['id'=>$id]);
+    	
+
+    	$res['comment'] = $this->common->getSelectedDataWithCondition('comment',['*'],['blog_id'=>$id],'id','desc');
+
+
+    	for ($i=0; $i < sizeof($res['comment']); $i++) { 
+    		$cid = $res['comment'][$i]['id'];
+    		$res['comment'][$i]['repcomment'] = $this->common->getSelectedDataWithCondition('replycomment',['*'],['blog_id'=>$id,'comment_id'=>$cid],'id','desc');
+    	}
+    	// _dx($res);
+
+    	$res['like'] = GetCount('blog_like','blog_id',$id)->count;
+    	$res['dislike'] = GetCount('blog_dislike','blog_id',$id)->count;
+    	
+    	$user_id = ($this->session->userdata('user')) ? $this->session->userdata('user')['id'] : '' ;
+    	
+    	if ($user_id) {
+	    	$res['al_like'] = GetCountTwoCond('blog_like','blog_id',$id,'user_id',$user_id)->count;
+	    	$res['al_dislike'] = GetCountTwoCond('blog_dislike','blog_id',$id,'user_id',$user_id)->count;
+    	}else{
+    		$res['al_like'] = 0;
+	    	$res['al_dislike'] = 0;
+    	}
+    	// _dx($res);
+    	$this->load->view('blog-details',$res);
+    }
