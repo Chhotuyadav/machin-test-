@@ -1,0 +1,191 @@
+class Common_model extends CI_Model {
+
+	
+    public function __construct(){
+	    parent::__construct();             
+	}
+	     
+
+
+
+ 	public function insert($tbl, $data){
+ 		      return $this->db->insert($tbl, $data);
+ 	}
+
+    public function insertData($tbl,$data){
+            $this->dataToSend = array();
+            
+            $res        = $this->db->insert($tbl,$data);
+            $rows       = $this->db->affected_rows();
+            $insertId   = $this->db->insert_id();
+            $this->dataToSend['status']    = $rows;
+            $this->dataToSend['insert_id']  = $insertId;
+            return $this->dataToSend;
+
+    }
+
+ 	public function getData($tbl){
+ 		       return $this->db->get($tbl)->result_array();
+ 	}
+    
+    public function update($tbl,$data,$condition){
+            foreach ($condition as $key => $value) {
+                $this->db->where($key,$value);
+            }
+            $res     =    $this->db->update($tbl,$data);
+            $row     =    $this->db->affected_rows();
+          
+            return $row;
+    }
+
+
+    public function getSelectedDataWithCondition($tblname,$selectArray,$conditions,$ordcol=false,$ordval='desc'){
+            
+        if($ordcol){
+            $this->db->order_by($ordcol,$ordval);
+        }
+        
+        for ($i=0; $i < sizeof($selectArray)  ; $i++) { 
+            $this->db->select($selectArray[$i]);
+        }
+
+        if($conditions){
+            foreach ($conditions as $key => $value) {
+                $this->db->where($key, $value);
+            }
+        }
+
+        $res = $this->db->get($tblname)->result_array();
+        return $res;
+    }
+
+
+	public function getSelectedOneDataWithCondition($tblname,$selectArray,$conditions){
+	                
+        for ($i=0; $i < sizeof($selectArray)  ; $i++) { 
+            $this->db->select($selectArray[$i]);
+        }
+
+        if($conditions){
+            foreach ($conditions as $key => $value) {
+                $this->db->where($key, $value);
+            }
+        }
+
+        $res = $this->db->get($tblname)->row_array();
+        return $res;
+    }
+
+    public function insert_batch($tbl,$data){
+        
+         $this->db->insert_batch($tbl,$data);
+    }
+
+    public function upsert($tbl,$condition,$data){
+                            $this->db->where('stu_id',$condition['stu_id']);
+                            $this->db->update($tbl,$data);
+            $res      =     $this->db->get($tbl)->result_array();
+            return    $res;
+
+    }
+
+                  
+
+
+
+    public function isExist($tblname,$data){     
+        
+
+        if(empty($data)) {
+            $dataToSend['status'] =   false;
+            $dataToSend['msg']    =   'No Data Found';
+            return $dataToSend;
+        }
+
+        foreach ($data as $key => $val) {
+            $this->db->where($key,$val);
+        }
+        $this->db->limit(1);
+        $data = $this->db->get($tblname)->result_array();
+        
+        if (sizeof($data) > 0){
+            $dataToSend['response']   =   $data;
+            $dataToSend['status'] =   true;
+            $dataToSend['msg']    =   'Exist';
+        }else{          
+            $dataToSend['status'] =   false;
+            $dataToSend['msg']    =   'Not Exist';
+            $dataToSend['response']   =   array();
+        }
+        return $dataToSend;
+
+    }
+
+
+    public function updateIsExist($tblname,$data,$dataIsNot){
+
+        if (empty($data)) {
+            $dataToSend['status'] =   false;
+            $dataToSend['msg']        =   'No Data Found';
+            return $dataToSend;
+
+        }
+
+        foreach ($data as $key => $val) {
+            $this->db->where($key,$val);
+        }
+
+        foreach ($dataIsNot as $key => $value){
+            $this->db->where($key.'!=',$value);
+        }
+
+        $this->db->get($tblname);
+        $res            =  $this->db->affected_rows();
+        if ($res>0){
+
+            $dataToSend['status']     =   true;
+            $dataToSend['msg']        =   'Exist';
+
+        }else{          
+
+            $dataToSend['status']     =   false;
+            $dataToSend['msg']        =   'Not Exist';
+
+        }
+        return $dataToSend;
+    }
+
+
+    public function add_bulk($tbl, $bulkdata){
+        //add bulk entries in table
+        return $this->db->insert_batch($tbl, $bulkdata);
+    }
+
+
+    public function delete($tbl,$data){ 
+        $this->dataToSend = array();
+        foreach ($data as $key => $value) {
+
+            $this->db->where($key,$value);
+
+        }            
+
+        $res        = $this->db->delete($tbl);
+
+        $rows       = $this->db->affected_rows();
+
+        $this->dataToSend['results']    = $rows;            
+
+        return $this->dataToSend;
+
+    }
+
+    public function TwoJoinTbl($tbl1,$tbl2,$join_cond,$condition){
+        $this->db->select('*');
+        $this->db->from($tbl1);
+        $this->db->join($tbl2, $join_cond , 'left');
+        foreach ($condition as $key => $value) {
+            $this->db->where($key,$value);
+        }
+        return $this->db->get()->result_array();
+    }
