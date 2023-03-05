@@ -52,3 +52,5 @@ public function __construct() {
 			die;
     }
   
+<td><?= GetData('janpad_panchayat','id',$stha['padsthapana_janpad_panchayat'])->panchayat_name ; ?></td>
+<td><?= date('d M Y', strtotime($stha['date_of_joining'])) ?></td>
