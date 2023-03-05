@@ -1,0 +1,74 @@
+$autoload['helper'] = array('url', 'file' ,'my');
+
+my_helper.php
+
+<?php
+
+function _dx($data){
+
+    echo "<pre>";
+
+    print_r($data);
+
+    echo "</pre>";
+
+    die;
+
+}
+
+Get data wih condtion
+function GetData($tbl,$col,$id){
+    $ci=& get_instance();
+    
+    $ci->db->select('*');
+    $ci->db->where($col,$id);
+    return $ci->db->get($tbl)->row();
+}
+
+is_logged in session controller
+function _isLoggedIn($thisObj){
+  if(!$thisObj->session->userdata('user')){
+    return redirect(site_url(''));
+  }
+}
+
+function get_client_ip() {
+    $ipaddress = '';
+    if (getenv('HTTP_CLIENT_IP'))
+        $ipaddress = getenv('HTTP_CLIENT_IP');
+    else if(getenv('HTTP_X_FORWARDED_FOR'))
+        $ipaddress = getenv('HTTP_X_FORWARDED_FOR');
+    else if(getenv('HTTP_X_FORWARDED'))
+        $ipaddress = getenv('HTTP_X_FORWARDED');
+    else if(getenv('HTTP_FORWARDED_FOR'))
+        $ipaddress = getenv('HTTP_FORWARDED_FOR');
+    else if(getenv('HTTP_FORWARDED'))
+        $ipaddress = getenv('HTTP_FORWARDED');
+    else if(getenv('REMOTE_ADDR'))
+        $ipaddress = getenv('REMOTE_ADDR');
+    else
+        $ipaddress = 'UNKNOWN';
+    return $ipaddress;
+}
+
+
+
+
+function GetCount($tbl,$col,$id){
+    $ci=& get_instance();
+    
+    $ci->db->select('count(*) as count');
+    $ci->db->where($col,$id);
+    return $ci->db->get($tbl)->row();
+}
+
+
+
+function GetCountTwoCond($tbl,$col,$id,$col1,$id1){
+    $ci=& get_instance();
+    
+    $ci->db->select('count(*) as count');
+    $ci->db->where($col,$id);
+    $ci->db->where($col1,$id1);
+    return $ci->db->get($tbl)->row();
+}
