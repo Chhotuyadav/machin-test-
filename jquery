@@ -1,0 +1,375 @@
+
+<td><a href="javascript:deleteById('CRPF','<?= $crpp['id']?>');">Delete</a></td>
+
+function deleteById(tbl,id) {
+    var res = getData(base_url+"/admin/deleteById","POST",{table:tbl,id:id})
+    if (res.status) {
+        showMsg(res.msg,'success') 
+        window.location.reload()
+    }else{
+        showMsg(res.msg,'danger') 
+    }
+  } 
+  
+  /////////////////////////////////
+  
+  <td><button id="btn-action" _id="<?=$crpp['id']?>" _tbl="CRPF" type="button" data-bs-toggle="modal" data-bs-target="#crpmodel"  class="btn btn-primary " >Edit</button></td>
+      $('body').on('click','#btn-action',function(){
+      var attrId = $(this).attr('_id')
+      var tbl = $(this).attr('_tbl')
+      var res = getData(base_url+"admin/getData","POST",{id:attrId,tbl:tbl})
+      if (res){
+        // console.log(res)
+        $('input[name=id]').val(res.id)
+        $('select[name=adeshi_are_shreni]').val(res.adeshi_are_shreni);
+        $('select[name=year]').val(res.year);
+        $('textarea[name=remark]').val(res.remark);
+      }
+      });
+      
+      /*default function get data*/
+    function getData(url,method,data){
+    
+       var dataToReturn = "";
+       $.ajax({
+                url     :   url,
+                method  :   method,
+                async   :   false,      
+                data    :   data,
+                success :   function(response){
+                  var responseObj = $.parseJSON(response);
+                  dataToReturn = responseObj;
+                } 
+    });
+    return dataToReturn;
+  }
+  =======================================
+  slelect district
+  
+  <select name="padsthapana_dis" class="form-control " id="onchangedis" required>
+    <option value="" selected disabled>Please Select</option>
+    <?php foreach ($dis as $diss ): ?>
+      <option value="<?= $diss['id'] ?>"><?= $diss['district_name'] ?></option>
+    <?php endforeach ?>
+  </select>
+  
+  $('body').on('change', '#onchangedis', function(e) {
+    e.preventDefault()
+    var val = this.value;
+    var res = getData(base_url+"/admin/getdispan","POST",{dis_id:val})
+    if (res) {
+      $("#panchayat").html(res);
+    }
+    
+  });
+
+  $('body').on('change', '#onchangediss', function(e) {
+    e.preventDefault()
+    var val = this.value;
+    var res = getData(base_url+"/admin/getdispan","POST",{dis_id:val})
+    if (res) {
+      $("#panchayatt").html(res);
+    }
+    
+  });
+  
+  
+  $('body').on('click','#btn-action',function(){
+    var attrId = $(this).attr('_id')
+    var tbl = $(this).attr('_tbl')
+    var res = getData(base_url+"admin/getData","POST",{id:attrId,tbl:tbl})
+    if (res){
+      console.log(res)
+      $('input[name=id]').val(res.id)
+      $('input[name=aadesh_no]').val(res.aadesh_no);
+      $('input[name=date]').val(res.date);
+      $('input[name=date_of_joining]').val(res.date_of_joining);
+      $('input[name=date_of_reliving]').val(res.date_of_reliving);
+      $('select[name=pad]').val(res.pad);
+      $('select[name=padsthapana_dis]').val(res.padsthapana_dis);
+      $('select[name=padsthapana_janpad_panchayat]').val(res.padsthapana_janpad_panchayat);
+      $('textarea[name=remark]').val(res.remark);
+    }
+  });
+  
+  ================================================
+  //login
+$("#login").validate({
+    submitHandler: function(form,e) {
+      e.preventDefault();
+      var formdata = new FormData(form)
+      var res = insertData(base_url+'adminlogin','POST',formdata);
+      if(res.status){
+          showMsg(res.msg,'success')
+          setTimeout(function(){
+            window.location.href = 'profile';         
+          }, 2000);
+      }else{
+          showMsg(res.msg,'danger')
+      }
+    }
+});
+
+$('#onchange').on('change', function() { 
+    var id = this.value;
+    window.location.href =  base_url+"employee/"+btoa(id)
+});
+
+////////////////////change password///////////////
+// admin change password
+$(document).ready(function() {
+    // Get the password and confirm password fields
+    var password = $('#password');
+    var confirm_password = $('#confirm_password'); 
+    // Add a keyup event listener to the confirm password field
+    confirm_password.on('keyup', function() {
+        // Get the entered password and confirm password values
+        var password_val = password.val();
+        var confirm_password_val = confirm_password.val();
+        
+        // Check if the entered passwords match
+        if (password_val === confirm_password_val ) {
+            // If the passwords match, set the border color of the confirm password field to green
+            confirm_password.css('border-color', 'green');
+            $('.valid-feedback').css("display","block");
+            $('.invalid-feedback').css("display","none");
+        } else {
+            // If the passwords don't match, set the border color of the confirm password field to red
+            confirm_password.css('border-color', 'red');
+            $('.invalid-feedback').css("display","block");
+            $('.valid-feedback').css("display","none");
+        }
+    });
+});
+
+
+function generateTemplate(data, src, destination){  
+        // console.log(data)
+        
+        var source   = document.getElementById(src).innerHTML;
+        var template = Handlebars.compile(source);
+        var generatedTemplate = template(data);     
+       
+        var rowContainer = document.getElementById(destination);   
+        console.log(rowContainer)
+        rowContainer.innerHTML = generatedTemplate;
+}
+
+
+Handlebars.registerHelper('ifCond', function (v1, operator, v2, options) {
+    // options.inverse(this);
+    switch (operator) {
+        case '==':
+            return (v1 == v2) ? options.fn(this) : options.inverse(this);
+        case '===':
+            return (v1 === v2) ? options.fn(this) : options.inverse(this);
+        case '!==':
+            return (v1 !== v2) ? options.fn(this) : options.inverse(this);
+        case '<':
+            return (v1 < v2) ? options.fn(this) : options.inverse(this);
+        case '<=':
+            return (v1 <= v2) ? options.fn(this) : options.inverse(this);
+        case '>':
+            return (v1 > v2) ? options.fn(this) : options.inverse(this);
+        case '>=':
+            return (v1 >= v2) ? options.fn(this) : options.inverse(this);
+        case '&&':
+            return (v1 && v2) ? options.fn(this) : options.inverse(this);
+        case '||':
+            return (v1 || v2) ? options.fn(this) : options.inverse(this);
+        default:
+        return options
+            return options.inverse(this);
+    }
+});
+
+
+/*default function get data*/
+    function getData(url,method,data){
+    
+       var dataToReturn = "";
+       $.ajax({
+                url     :   url,
+                method  :   method,
+                async   :   false,      
+                data    :   data,
+                success :   function(response){
+                  var responseObj = $.parseJSON(response);
+                  dataToReturn = responseObj;
+                } 
+    });
+    return dataToReturn;
+  }
+
+
+//All alert common function
+function showMsg(text,type=''){
+    if (type == 'success') {
+        toastr.success(text);
+    }else if (type == 'danger') {
+        toastr.error(text)
+    }else{
+        toastr.warning(text)
+    }
+}
+
+
+
+//All data Insert coustom function
+function insertData(url, method, data) {
+    var dataToReturn = "";
+    $.ajax({
+        url: url,
+        method: method,
+        async: false,
+        data: data,
+        contentType: false,
+        processData: false,
+        success: function (response) {
+            var responseObj = $.parseJSON(response);
+            dataToReturn = responseObj;
+        }
+    });
+    return dataToReturn;
+}
+
+$(document).ready( function () {
+ $('#reporttabl').DataTable( {
+    dom: 'Bfrtip',
+        buttons: [
+            'copy', 'csv', 'excel', 'pdf', 'print'
+        ],
+      "paging": true,
+      "lengthChange": false,
+      "searching": true,
+      "ordering": true,
+      "info": true,
+      "autoWidth": false,
+} );
+});
+
+//like
+$('body').on('click','#like',function(){
+  $('#dislike').removeClass('active');
+  $(this).addClass('active');
+  var blog_id = $(this).attr('_blog_id') 
+  var user_id = $(this).attr('_user_id')
+  if (user_id=='') {
+    $('#myModal').modal('show')
+    return false
+  }
+  var res = insertData(BASEURL+'bloglike/'+blog_id+'/'+user_id,'POST',{});
+  if (res.status) {
+    // alert(res.msg)
+    $('.fa-thumbs-up').text('('+res.like+')')
+    $('.fa-thumbs-down').text('('+res.dislike+')')
+  }else{
+    alert(res.msg)
+  }
+});
+//dislike
+$('body').on('click','#dislike',function(){
+  $('#like').removeClass('active');
+  $(this).addClass('active');
+  var blog_id = $(this).attr('blog_id') 
+  var user_id = $(this).attr('user_id')
+  if (user_id=='') {
+    $('#myModal').modal('show')
+    return false
+  }
+  var res = insertData(BASEURL+'dislike/'+blog_id+'/'+user_id,'POST',{});
+  if (res.status) {
+    // alert(res.msg)
+    $('.fa-thumbs-up').text('('+res.like+')')
+    $('.fa-thumbs-down').text('('+res.dislike+')')
+  }else{
+    alert(res.msg)
+  }
+});
+
+
+//validation error message
+function msgShow(type,text) {
+  $('.alert-show').removeClass('d-none')
+  if (type == 'success') {
+      $('.alert-show').removeClass('alert-danger')
+      $('.alert-show').removeClass('alert-warning')
+      $('.alert-show').addClass('alert-success')
+      $('.msg-text').html(text)
+      $('.type-text').html('Success !')
+  }else if (type == 'danger') {
+      $('.alert-show').removeClass('alert-warning')
+      $('.alert-show').removeClass('alert-success')
+      $('.alert-show').addClass('alert-danger')
+      $('.msg-text').html(text)
+      $('.type-text').html('Danger !')
+  }else{
+      $('.alert-show').removeClass('alert-danger')
+      $('.alert-show').removeClass('alert-success')
+      $('.alert-show').addClass('alert-warning')
+      $('.msg-text').html(text)
+      $('.type-text').html('Alert !')
+  }
+  setTimeout(function(){
+      $('.alert-show').addClass('d-none')
+  }, 3000);
+}
+
+
+
+$.postRequest = function(url, data, csrfToken,callback, type, httpMethod) {
+      // Old versions for safari do not allow default declration in signature. Using this method for that
+      if (type === undefined) {
+          type="JSON";
+      }
+      if (httpMethod === undefined) {
+          httpMethod="POST";
+      }
+
+
+    function csrfSafeMethod(method) {
+      // these HTTP methods do not require CSRF protection
+      return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+    }
+
+
+    // shift arguments if data argument was omitted
+    if ($.isFunction(data)) {
+      type = type || callback;
+      callback = data;
+      data = undefined;
+    }
+
+    return $.ajax(jQuery.extend({
+      url: url,
+      type: httpMethod,
+      dataType: type,
+      data: JSON.stringify(data),
+      success: callback,
+        contentType: "application/json",
+      beforeSend: function(xhr, settings) {
+        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+          xhr.setRequestHeader("X-CSRFToken", csrfToken);
+        }
+      }
+    }, jQuery.isPlainObject(url) && url));
+};
+
+
+
+function generateTemplate(data, src, destination){  
+        // console.log(data)
+        
+        var source   = document.getElementById(src).innerHTML;
+        var template = Handlebars.compile(source);
+        var generatedTemplate = template(data);     
+       
+        var rowContainer = document.getElementById(destination);   
+        // console.log(rowContainer)
+        rowContainer.innerHTML = generatedTemplate;
+}
+  
+  
+  
+  <td><?= GetData('janpad_panchayat','id',$stha['padsthapana_janpad_panchayat'])->panchayat_name ; ?></td>
+  <td><?= date('d M Y', strtotime($stha['date_of_joining'])) ?></td>
