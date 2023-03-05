@@ -1,0 +1,54 @@
+public function __construct() {
+    parent::__construct(); 
+      $this->load->model('Common_model','common');
+      // _isLoggedIn($this);
+  }
+  
+  common function
+  getData -> retrived all data without condition
+  getSelectedDataWithCondition -> retireved all data with condition
+  getSelectedOneDataWithCondition -> retireved one data with condition
+  
+  
+  Auth controller
+  public function adminlogin(){
+    	// _dx($_POST);
+    	$this->form_validation->set_rules('username', 'Username', 'trim|required');
+		$this->form_validation->set_rules('password', 'Password', 'trim|required');
+
+		if ($this->form_validation->run() == FALSE){
+			$dataToReturn['status'] = false;
+			$dataToReturn['msg'] = validation_errors();
+			echo json_encode($dataToReturn);
+			die;
+		}
+
+		$data['username'] = $this->input->post('username');
+		$result1 = $this->common->isExist('admin',$data);
+		
+		if (!$result1['status']) {
+			$dataToReturn['status'] = false;
+			$dataToReturn['msg'] = 'Invalid Email';
+			echo json_encode($dataToReturn);
+			die();	
+		}
+
+		$data = array(
+			'username' => $this->input->post('username'),
+			'password' => md5($this->input->post('password')),
+		);
+
+		$result = $this->common->getSelectedOneDataWithCondition('admin',['*'],$data);
+
+		if (!empty($result)) {
+			$this->session->set_userdata('admin',$result);
+			    $dataToReturn['status'] = true;
+				$dataToReturn['msg'] = 'Login Successfully';
+			}else{
+				$dataToReturn['status'] = false;
+				$dataToReturn['msg'] = 'Incorrect Password';
+			}
+			echo json_encode($dataToReturn);
+			die;
+    }
+  
